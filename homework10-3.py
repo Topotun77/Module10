@@ -12,10 +12,13 @@
 # (race conditions) при модификации общего ресурса.
 
 from threading import Thread, Lock
+
+
 # from time import sleep
 
 class BankAccount():
     lock = Lock()
+
     def __init__(self, balance=1000):
         self.balance = balance
 
@@ -30,13 +33,16 @@ class BankAccount():
             self.balance -= amount
             print(f'Withdrew {amount}, new balance is {self.balance}')
 
+
 def deposit_task(account, amount):
     for _ in range(5):
         account.deposit(amount)
 
+
 def withdraw_task(account, amount):
     for _ in range(5):
         account.withdraw(amount)
+
 
 account = BankAccount()
 
