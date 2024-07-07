@@ -12,8 +12,6 @@
 # (race conditions) при модификации общего ресурса.
 
 from threading import Thread, Lock
-
-
 # from time import sleep
 
 class BankAccount():
