@@ -106,24 +106,48 @@ class TickerReader():
             TickerData[tick_name] = volatility
 
 
-def print_rez(lst, zero_list):
+def print_rez(data):
     """
-    Печать результата
-    :param lst: Отсортированный список со значениями
-    :param zero_list: Список с нулевыми значениями волатильности
+    Печать результата в формате:
+        Максимальная волатильность:
+        ТИКЕР1 - ХХХ.ХХ %
+        ТИКЕР2 - ХХХ.ХХ %
+        ТИКЕР3 - ХХХ.ХХ %
+    Минимальная волатильность:
+        ТИКЕР4 - ХХХ.ХХ %
+        ТИКЕР5 - ХХХ.ХХ %
+        ТИКЕР6 - ХХХ.ХХ %
+    Нулевая волатильность:
+        ТИКЕР7, ТИКЕР8, ТИКЕР9, ТИКЕР10, ТИКЕР11, ТИКЕР12
+    Волатильности указывать в порядке убывания. Тикеры с нулевой волатильностью упорядочить по имени.
+    :param data: Словарь с данными для вывода
     :return: None
     """
+    ticker_list = list(map(lambda x, y: [y, x], data.keys(), data.values()))
+    ticker_list.sort()
+    zero_list = []
+    while True:
+        if ticker_list[0][0] > 0:
+            break
+        zero_list.append(ticker_list[0][1])
+        ticker_list.pop(0)
+    zero_list.sort()
     print('\nМаксимальная волатильность:')
     for i in range(3):
-        print(f'\t{lst[len(lst) - i - 1][1]} - {lst[len(lst) - i - 1][0]:0.2f} %')
+        print(f'\t{ticker_list[len(ticker_list) - i - 1][1]} - {ticker_list[len(ticker_list) - i - 1][0]:0.2f} %')
     print('\nМинимальная волатильность:')
     for i in range(3):
-        print(f'\t{lst[2-i][1]} - {lst[2-i][0]:0.2f} %')
+        print(f'\t{ticker_list[2-i][1]} - {ticker_list[2-i][0]:0.2f} %')
     print('\nНулевая волатильность:')
     print(', '.join(zero_list))
 
 
 def main(path_='.'):
+    """
+    Основной процесс
+    :param path_: Путь к файлам с данными в формате csv
+    :return: None
+    """
     path_ = path.abspath(path_)
     for dir_, _, files in walk(path_):
         print('\nСписок файлов для обработки:', files)
@@ -132,16 +156,7 @@ def main(path_='.'):
             print(f'Обнаружен файл: {fl_}, обрабатываем...')
             ticker_read = TickerReader(filepath)
             ticker_read.run()
-        ticker_list = list(map(lambda x, y: [y, x], TickerData.keys(), TickerData.values()))
-        ticker_list.sort()
-        zero_list = []
-        while True:
-            if ticker_list[0][0] > 0:
-                break
-            zero_list.append(ticker_list[0][1])
-            ticker_list.pop(0)
-        zero_list.sort()
-        print_rez(ticker_list, zero_list)
+        print_rez(TickerData)
 
 
 if __name__ == '__main__':
