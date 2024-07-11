@@ -126,9 +126,7 @@ def print_rez(data):
     ticker_list = list(map(lambda x, y: [y, x], data.keys(), data.values()))
     ticker_list.sort()
     zero_list = []
-    while True:
-        if ticker_list[0][0] > 0:
-            break
+    while ticker_list[0][0] == 0:
         zero_list.append(ticker_list[0][1])
         ticker_list.pop(0)
     zero_list.sort()
