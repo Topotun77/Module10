@@ -26,6 +26,8 @@ import csv
 import logging
 from multiprocessing import Process
 from time import time
+
+
 # from pprint import pprint
 
 class TickerReader(Process):
@@ -35,7 +37,7 @@ class TickerReader(Process):
         self.file_path = file_path
 
     def run(self):
-        global TickerData
+        global TickerData  # TODO если добавлять переменную в класс TickerReader, то будет создаваться новый экземпляр
         # log = logging.getLogger(__name__)
         with open(self.file_path, newline='') as cf:
             data_ = csv.reader(cf)
@@ -89,7 +91,7 @@ def print_rez(data):
             print(f'\t{ticker_list[len(ticker_list) - i - 1][1]} - {ticker_list[len(ticker_list) - i - 1][0]:0.2f} %')
         print('\nМинимальная волатильность:')
         for i in range(3):
-            print(f'\t{ticker_list[2-i][1]} - {ticker_list[2-i][0]:0.2f} %')
+            print(f'\t{ticker_list[2 - i][1]} - {ticker_list[2 - i][0]:0.2f} %')
     except Exception as e:
         log.error(e.args)
     print('\nНулевая волатильность:')
