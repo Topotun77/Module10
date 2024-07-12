@@ -78,6 +78,7 @@
 from os import walk, path
 import csv
 import logging
+from time import time
 # from pprint import pprint
 
 
@@ -123,7 +124,8 @@ def print_rez(data):
     :param data: Словарь с данными для вывода
     :return: None
     """
-    ticker_list = list(map(lambda x, y: [y, x], data.keys(), data.values()))
+    # ticker_list = list(map(lambda x, y: [y, x], data.keys(), data.values()))
+    ticker_list = list(zip(data.values(), data.keys()))
     ticker_list.sort()
     zero_list = []
     while ticker_list[0][0] == 0:
@@ -154,9 +156,12 @@ def main(path_='.'):
             print(f'Обнаружен файл: {fl_}, обрабатываем...')
             ticker_read = TickerReader(filepath)
             ticker_read.run()
-        print_rez(TickerData)
+    print_rez(TickerData)
 
 
 if __name__ == '__main__':
     TickerData: dict = {}
+    time_start = time()
     main('./trades/')
+    time_end = time()
+    print(f'\nОбработка производилась: {time_end - time_start}')
