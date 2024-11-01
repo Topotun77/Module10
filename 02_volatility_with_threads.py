@@ -17,9 +17,7 @@
 #       ТИКЕР7, ТИКЕР8, ТИКЕР9, ТИКЕР10, ТИКЕР11, ТИКЕР12
 # Волатильности указывать в порядке убывания. Тикеры с нулевой волатильностью упорядочить по имени.
 #
-# TODO Внимание! это задание можно выполнять только после зачета lesson_012/01_volatility.py !!!
-
-# TODO тут ваш код в многопоточном стиле
+# TODO тут код в многопоточном стиле
 
 from os import walk, path
 import csv
@@ -114,6 +112,6 @@ def main(path_='.'):
 if __name__ == '__main__':
     TickerData: dict = {}
     time_start = time()
-    main('./trades/')
+    main('trades/')
     time_end = time()
-    print(f'\nОбработка производилась: {time_end - time_start}')
+    print(f'\nОбработка производилась: {time_end - time_start} сек.')

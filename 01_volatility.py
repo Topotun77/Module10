@@ -82,7 +82,7 @@ from time import time
 # from pprint import pprint
 
 
-class TickerReader():
+class TickerReader:
 
     def __init__(self, file_path):
         self.file_path = file_path
@@ -162,6 +162,6 @@ def main(path_='.'):
 if __name__ == '__main__':
     TickerData: dict = {}
     time_start = time()
-    main('./trades/')
+    main('trades/')
     time_end = time()
-    print(f'\nОбработка производилась: {time_end - time_start}')
+    print(f'\nОбработка производилась: {time_end - time_start} сек.')

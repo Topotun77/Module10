@@ -29,21 +29,23 @@
 # 3.Метод run - принимает запросы и создаёт для каждого свой параллельный процесс,
 # запускает его(start) и замораживает(join).
 
-import multiprocessing as mp
-# from threading import Lock
+from multiprocessing import Process, Lock
+import queue
 import logging
 
 class WarehouseManager():
+    # lock = Lock()
 
     def __init__(self, data: dict = None):
         if not data:
             data = {}
         self.data = data
+        self.lock = Lock()
 
     def __str__(self):
         return str(self.data)
 
-    def process_request(self, request: tuple, other):
+    def process_request(self, request: tuple, queue_data):
         class ErrorOperation(Exception):
             def __init__(self, message='Operation Error', add_info=None):
                 super().__init__()
@@ -58,31 +60,33 @@ class WarehouseManager():
 
         def create_operation(operation):
             if operation == 'receipt':
-                def operation(prod, count, other):
-                    print('id(other)', id(other))
-                    # with WarehouseManager.lock:
-                    other.data[prod] = other.data[prod] + count if prod in other.data else count
+                def operation(prod, count, queue_data):
+                    with self.lock:
+                        data = queue_data.get()
+                        data[prod] = data[prod] + count if prod in data else count
+                        queue_data.put(data)
 
                 return operation
             elif operation == 'shipment':
-                def operation(prod, count, other):
-                    print('id(other)', id(other))
-                    # with WarehouseManager.lock:
-                    if prod in other.data:
-                        other.data[prod] = other.data[prod] - count if count < other.data[prod] else 0
-                    else:
-                        raise ErrorProduct(f'Нет такого продукта {prod}')
+                def operation(prod, count, queue_data):
+                    with self.lock:
+                        data = queue_data.get()
+                        if prod in data:
+                            data[prod] = data[prod] - count if count < data[prod] else 0
+                            queue_data.put(data)
+                        else:
+                            queue_data.put(data)
+                            raise ErrorProduct(f'Нет такого продукта {prod}')
+
 
                 return operation
             else:
                 raise ErrorOperation(f'Некорректно введена операция {operation}')
 
-        # print('process_request!!!', id(self))
-        # print(other.__dict__, id(other), id(self), self.__dict__)
         log = logging.getLogger(__name__)
         try:
             func = create_operation(request[1])
-            func(request[0], request[2], other)
+            func(request[0], request[2], queue_data)
         except ErrorProduct as e:
             log.error(e.message)
         except ErrorOperation as e:
@@ -91,23 +95,22 @@ class WarehouseManager():
             log.exception(e)
         print(request, ':\t', self)
 
-    def run(self, requests):
-        global queue_
-        # print(id(self))
-        # processes = []
+    def run(self, requests, queue_data):
+        processes = []
         for req in requests:
-            # print('in run', id(self))
+            queue_data.put(self.data)
             # self.process_request(req)
-            # proc = mp.Process(target=WarehouseManager.process_request, kwargs=dict(self=self, request=req))
-            other = self
-            proc = mp.Process(target=self.process_request, kwargs=dict(request=req, other=other))
-            # processes.append(proc)
-            proc.start()
-            proc.join()
+            proc = Process(target=WarehouseManager.process_request(self, req, queue_data))
+            # proc = Process(target=self.process_request, kwargs=dict(request=req, queue_data=queue_data))
+            self.data = queue_data.get()
+            processes.append(proc)
+        for i in processes:
+            i.start()
+            i.join()
 
 
 if __name__ == '__main__':
-    queue_ = mp.Queue()
+    queue_ = queue.Queue(maxsize=10)
     # Создаем менеджера склада
     manager = WarehouseManager()
 
@@ -121,7 +124,7 @@ if __name__ == '__main__':
     ]
 
     # Запускаем обработку запросов
-    manager.run(requests)
+    manager.run(requests, queue_)
 
     # Выводим обновленные данные о складских запасах
     print()
